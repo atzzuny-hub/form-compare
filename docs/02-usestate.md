@@ -1,6 +1,6 @@
 # [폼 비교 ②] 공통 데이터·검증 규칙 정하고 useState로 예약 모달 만들기
 
-> 상태: **4번(useState 폼) 작성 중.** 이어서 할 때는 [4. useState 폼](#4-usestate-폼--state-formtsx)의 단계 중 멈춘 곳부터 하면 된다.
+> 상태: **4번(useState 폼) 작성 중 — 다음은 1-1단계(`ERROR_MESSAGES` 꺼내 쓰기), 아직 안 함.** 실제 파일은 단계 순서대로가 아니라 작게 시작해서 늘려 가는 중이라, 이어서 할 때는 4번 맨 위 [현재 진행 위치](#현재-진행-위치-다른-컴퓨터에서-이어갈-때-여기부터)부터 본다.
 > 진행 상황 전체는 [PROGRESS.md](./PROGRESS.md) 참고.
 
 목차
@@ -246,28 +246,60 @@ MUI Dialog는 닫히면(닫힘 애니메이션이 끝나면) **안의 내용을 
 
 ### 현재 진행 위치 (다른 컴퓨터에서 이어갈 때 여기부터)
 
-- [ ] 0단계 뼈대
-- [ ] 1단계 지역 / 지점 ← **지금 작성 중** (Select 모양만 있고 state 연결 전)
+> 마지막 정리: 2026-10-27 · 코드 기준 마지막 커밋 `6a90937 wip: useState 폼 지역·지점 선택과 에러 표시` (origin/main에 push됨)
+
+실제 파일은 아래 0~8단계 코드를 그대로 옮기지 않고, **지역·지점 두 칸으로 작게 시작해서 칸을 하나씩 늘려 가는** 방식으로 쓰고 있다. 그래서 지금은 타입·validate·제출 버튼이 지역·지점만 다룬다. 0~8단계 코드는 "완성 기준"으로 참고한다.
+
+- [x] 0단계 뼈대 — 단, `ReservationInfo`는 `regionId`, `branchId`만 있다(칸을 추가할 때 같이 늘린다). `isAdmin` prop과 `clearError`는 아직 없고, onChange 안에서 `setErrors`를 직접 부른다.
+- [x] 1단계 지역 / 지점 — state 연결, 지역을 바꾸면 지점 초기화, `MenuItem value={0}` "선택안함"
+- [x] 6단계 일부를 먼저 — `validate` + `errors` state + 임시 "예약" 버튼(`handleSubmit`), `FormHelperText`로 에러 표시
+- [ ] **다음 할 일: 1-1단계 공통 에러 메시지(`ERROR_MESSAGES`) 꺼내 쓰기** ← 아직 안 함
+- [ ] 1단계 정리 (아래 "현재 파일에서 고쳐야 할 것")
 - [ ] 2단계 예약일시
 - [ ] 3단계 인원 수
 - [ ] 4단계 참석자
 - [ ] 5단계 요청사항 / 담당자
-- [ ] 6단계 검사 + 제출
+- [ ] 6단계 나머지 — **새로 만들지 말고** 지금 있는 `validate`·`handleSubmit`·"예약" 버튼을 고친다: validate에 `isAdmin`(밖으로 옮겼으면 두 번째 인자로), `console.log` 대신 `setSubmitted(toSubmitValue(reservationInfo))`, 에러가 있으면 `setSubmitted(null)`. 이름·문구를 6단계 코드처럼 `handleClickSubmit`·"예약하기"로 바꿀지는 선택 (7단계의 "예약하기 버튼 아래"는 지금 파일의 "예약" 버튼 아래)
 - [ ] 7단계 디버그 출력 (`form-debug-panel.tsx`)
 - [ ] 8단계 view 연결 (`isAdmin`, `key`)
 
-현재 파일에서 고쳐야 할 것
+2~5단계 코드를 지금 파일에 옮길 때 같이 챙길 것 (단계 코드는 0단계 뼈대가 다 있다고 가정하고 쓰여 있다)
+
+1. `ReservationInfo`·`EMPTY_RESERVATION`·validate에 그 칸을 추가한다. `ReservationInfo`에 안 넣어도 `setReservationInfo` 콜백에서는 빨간 줄이 안 뜬다 (아래 "작성하며 만난 실수"의 `marketId` 참고).
+2. 그 단계에서 쓰는 import를 추가한다. 2단계: `Dayjs` 타입·`DateTimePicker`·`DISPLAY_FORMAT`·`RESULT_FORMAT` / 3단계: `TextField` / 4단계: `useRef`·`Icon`·`Box`·`IconButton`·`Typography`·`PHONE_REGEX` / 5단계: `MANAGER_LIST`
+3. 단계 코드의 `clearError('x')`는 지금 파일에 없다. 0단계의 `clearError`를 먼저 넣거나, 지금처럼 `setErrors((prev) => ({ ...prev, x: undefined }))`로 쓴다.
+4. 5단계 담당자 칸은 `isAdmin`을 쓴다. 0단계의 `Props`와 `({ isAdmin }: Props)`를 먼저 넣고, view도 `<StateForm isAdmin={isAdmin} />`로 바꾼다.
+5. 단계 설명의 "`<Typography variant="h6">useState</Typography>` 아래"는 지금 파일에 그 제목이 없다. 아래 표대로 제목을 먼저 넣는다.
+
+현재 파일에서 고쳐야 할 것 (`6a90937` 기준)
 
 | 위치 | 문제 | 고치는 법 |
 |---|---|---|
-| 4번째 줄 | `import { HtmlContext } from "next/dist/..."` (자동 import 사고) | 지우기 |
-| 지역/지점 `value={''}` | state 연결 전 + 값이 숫자 id인데 빈 문자열 | 1단계처럼 `reservationInfo.regionId` |
-| 지역·지점 InputLabel id, Select labelId | 둘 다 `"region"` → 화면에 같은 id가 여러 개 | `state-region-label`, `state-branch-label` |
-| 지점 `label="Age"` | MUI 문서 예제 그대로 → 테두리 빈 칸 폭이 "Age" 기준 | `label="지점"` |
-| 지점 `id="region"`, `sx={{alignItems:'center'}}` | 필요 없음 | 지우기 |
-| (이전 시도) `BRANCH_LIST.map(v => v.regionId === ...)` | `map`은 true/false 배열을 만든다 | `.filter(...)` |
-| (이전 시도) 지역을 **이름**으로 저장 | MenuItem의 value는 **id(숫자)** → 비교가 항상 실패 | id(숫자)를 저장 |
-| (이전 시도) 지점이 지역 state를 같이 씀 | 지점을 고르면 지역이 바뀜 | 값마다 따로 (`regionId`, `branchId`) |
+| validate 안의 문구 | `"지역을 선택하세요."`처럼 직접 썼고, 마침표까지 붙어 있어 규칙 표·`ERROR_MESSAGES`와 다르다 | 1-1단계: `ERROR_MESSAGES.regionId` |
+| 지역·지점 InputLabel id, Select labelId | 지역은 `"region"`. 지점은 InputLabel `id="branchId"`인데 Select는 `labelId="region"`이라 지점 Select가 **"지역" 라벨에 연결**된다 | `state-region-label`, `state-branch-label` (세 폼이 한 화면에 뜨면 `region` 같은 짧은 id는 겹친다. MUI Select는 `document.getElementById(labelId)`로 라벨을 찾는다) |
+| 지점 `label="Age"` | MUI 문서 예제 그대로라 테두리 빈 칸 폭이 "Age" 기준 | `label="지점"` |
+| 지점 `id="region"` | 지점 Select(combobox)의 DOM id가 되어 지역 라벨의 id와 겹친다 | 지우기 |
+| 지점 `sx={{alignItems:'center'}}` | 입력칸이 이미 가운데 정렬이라 효과 없음 | 지우기 |
+| 바깥 `<div>` | 칸 사이 간격이 없어서, 에러가 뜨면 지역 에러 문구가 지점 라벨과 9px쯤 겹친다 | `<Stack spacing={2}>` (`Stack` import 추가) |
+| 제목 | view에서 `useState` 제목을 주석 처리하고 `<StateForm/>`으로 바꿨는데 StateForm 안에도 제목이 없다 → useState 칸만 제목이 없다 | `<Stack spacing={2}>` 바로 안 첫 줄에 `<Typography variant="h6">useState</Typography>` (`Typography` import 추가). 2단계부터 나오는 "제목 아래에 추가"의 기준 위치도 된다 |
+| 지역·지점 FormControl | `required`가 없어서 라벨에 `*`가 안 붙는다 (규칙 표에서 둘 다 필수) | `<FormControl ... required>` |
+| 지점 FormControl | 지역을 고르기 전에도 지점을 열 수 있다 (동작 규칙 위반) | `disabled={!reservationInfo.regionId}` |
+| `type ReservationErrors`, `validate` 위치 | 컴포넌트 안에 있다 (동작은 한다) | (선택) 컴포넌트 밖, `ReservationInfo` 아래로. validate는 state·props를 쓰지 않으므로 밖에 둬도 된다. 나중에 `isAdmin`이 필요하면 두 번째 인자로 받는다 (6단계) |
+
+### 작성하며 만난 실수 (블로그 재료)
+
+| 시도 | 결과 | 고친 법 |
+|---|---|---|
+| `useState<ERROR_MESSAGES>()` | TS2749 — `ERROR_MESSAGES`는 **값**이라 타입 자리(`<>`)에 못 쓴다 | 에러 타입을 따로 만든다: `type ReservationErrors = Partial<Record<keyof ReservationInfo, string>>` |
+| `useState<ReservationInfo>()` (초기값 없음) | 타입이 `ReservationInfo \| undefined`가 되어 쓰는 곳마다 빨간 줄 (이때 만난 건 TS2345) | 초기값을 넘긴다: `useState<ReservationInfo>(EMPTY_RESERVATION)` 또는 `({ regionId: 0, branchId: 0 })` |
+| `onChange={() => handleChangeRegion}` | 함수를 **돌려주기만** 하고 실행하지 않아서 골라도 안 바뀐다 | `onChange={handleChangeRegion}` |
+| 값은 `0`인데 선택지에 0이 없음 | MUI 경고 ``out-of-range value `0` `` | `<MenuItem value={0} divider><em>선택안함</em></MenuItem>` 추가 |
+| 지역을 바꿀 때 `marketId: 0` (오타) | 지점이 안 지워져서 ``out-of-range value `11` `` 경고. **TS도 못 잡는다** (setState 콜백이 돌려주는 객체는 남는 키를 검사하지 않음) | `branchId: 0`. 이런 오타까지 잡으려면 `(prev): ReservationInfo => ({ ...prev, ... })`처럼 반환 타입을 적는다 |
+| `<FormHelperText>{validate.regionId}</FormHelperText>` | `validate`는 **함수**라서 `.regionId`가 없다 | 제출할 때 `validate()` 결과를 `setErrors`로 저장하고, 화면은 `errors.regionId`를 읽는다. (렌더링 중에 `validate(...).regionId`를 부르면 모달을 열자마자 빨간 에러가 뜬다) |
+| `BRANCH_LIST.map(v => v.regionId === ...)` | `map`은 true/false 배열을 만든다 | `.filter(...)` |
+| 지역을 **이름**으로 저장 | MenuItem의 value는 **id(숫자)** → 비교가 항상 실패 | id(숫자)를 저장 |
+| 지점이 지역 state를 같이 씀 | 지점을 고르면 지역이 바뀜 | 값마다 따로 (`regionId`, `branchId`) |
+| `import { HtmlContext } from "next/dist/..."` | 에디터 자동 import 사고 | 지움 (`6a90937`) |
 
 ### Select 라벨은 labelId 방식으로
 
@@ -438,6 +470,53 @@ JSX(`<Typography variant="h6">useState</Typography>` 아래)에 추가:
 
 - `SelectChangeEvent<number>`이면 `e.target.value`가 이미 숫자다. 원본처럼 `String()` ↔ `Number()` 변환을 할 필요가 없다.
 - 확인: 지역 고르기 전엔 지점이 회색, 서울 → 강남·홍대만, 부산으로 바꾸면 지점이 "선택안함"으로 돌아감.
+
+### 1-1단계. 공통 에러 메시지 꺼내 쓰기 — `ERROR_MESSAGES`
+
+> 지금 파일(지역·지점만 있는 validate) 기준. **아직 안 한 단계.** 6단계의 완성 validate는 처음부터 `ERROR_MESSAGES`를 쓴다.
+
+`errors` state, `handleSubmit`, onChange에서 에러 지우기, `FormHelperText`는 이미 있으니 **두 군데만** 바꾸면 된다.
+
+① import에 `ERROR_MESSAGES` 추가
+
+```tsx
+import { BRANCH_LIST, ERROR_MESSAGES, REGION_LIST } from "./constants";
+```
+
+② validate 안의 문자열을 꺼내 쓰기
+
+```tsx
+if(!info.regionId) newErrors.regionId = ERROR_MESSAGES.regionId;
+if(!info.branchId) newErrors.branchId = ERROR_MESSAGES.branchId;
+```
+
+**타입(`ReservationErrors`)은 그대로 둔다.** `as const` 덕분에 `ERROR_MESSAGES.regionId`의 타입은 `'지역을 선택하세요'`라는 정확한 글자이고, 이건 `string` 칸에 들어간다.
+
+바꾸면 달라지는 것
+
+- **문구가 세 폼에서 같아진다.** 직접 쓴 `"지역을 선택하세요."`에는 마침표가 있었고 `ERROR_MESSAGES`에는 없다. ③④편의 zod 스키마도 같은 상수를 쓴다.
+- **TypeScript가 잡아주는 실수**
+
+  ```tsx
+  ERROR_MESSAGES.regionid              // ❌ TS2551 ... Did you mean 'regionId'?
+  ERROR_MESSAGES.regionId = '바꿈'      // ❌ TS2540 읽기전용 (타입 검사에서만. Object.freeze처럼 실행 중에 막는 건 아니다)
+
+  // 3단계에서 ReservationInfo에 headCount를 추가한 뒤
+  newErrors.headCount = ERROR_MESSAGES.headCount        // ❌ TS2322 객체라서 string에 못 넣음
+  newErrors.headCount = ERROR_MESSAGES.headCount.empty  // ✅
+  ```
+
+  (`headCount`를 추가하기 전에 시험하면 "그런 칸 없음"(TS2339)이 먼저 뜬다.)
+
+- **여전히 못 잡는 것** — 값 타입이 `string`이라 다른 칸의 문구나 아무 글자도 들어간다.
+
+  ```tsx
+  newErrors.regionId = ERROR_MESSAGES.branchId   // 통과
+  ```
+
+  이것까지 막으려면 `ERROR_MESSAGES`에서 칸별 문구 타입을 뽑아야 하는데, `headCount`처럼 문구가 여러 개인 칸이 섞여 있어서 조건부 타입(`M[K] extends string ? ... : ...`)까지 써야 한다. ②편에서는 쓰지 않는다.
+
+확인: 빈 상태로 "예약" → "지역을 선택하세요" / "지점을 선택하세요"(마침표 없음)가 빨갛게. 지역을 고르면 지역 문구만 사라진다.
 
 ### 2단계. 예약일시
 

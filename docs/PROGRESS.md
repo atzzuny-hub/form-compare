@@ -1,7 +1,7 @@
 # 진행 상황 / 이어서 작업하기
 
 > 다른 컴퓨터(또는 새 Claude 세션)에서 이어갈 때 이 파일부터 읽는다.
-> 마지막 정리: 2026-10-26
+> 마지막 정리: 2026-10-27
 
 ## 다른 컴퓨터에서 시작하기
 
@@ -29,12 +29,12 @@ http://localhost:3000 → "열기" 버튼 → 모달.
 | 편 | 내용 | 상태 |
 |---|---|---|
 | ① | Next.js 16 + MUI v9 셋업 | ✅ 완료 (커밋 `b01366b`) |
-| ② | 공통 데이터·검증 규칙 + useState로 만들기 | 🔄 진행 중 — 4번(state-form.tsx) 1단계 |
+| ② | 공통 데이터·검증 규칙 + useState로 만들기 | 🔄 진행 중 — 4번(state-form.tsx) 1단계 끝, 다음은 1-1단계(`ERROR_MESSAGES` 연결) |
 | ③ | zod 스키마 + react-hook-form + MUI 기본 컴포넌트 | ⏳ |
 | ④ | zod + Field.*로 줄여보기 (Field.* 직접 구현) | ⏳ |
 | ⑤ | 세 방식 비교: 고칠까, 둘까? | ⏳ |
 
-## 현재 상태 (2026-10-26)
+## 현재 상태 (2026-10-27)
 
 ### ② 진행 상황
 
@@ -42,25 +42,23 @@ http://localhost:3000 → "열기" 버튼 → 모달.
 |---|---|---|
 | 1. 공통 데이터 | ✅ 코드 완료 | `types.ts`, `constants.ts` |
 | 2. 검증 규칙 | ✅ 코드 완료 | `constants.ts`의 `ERROR_MESSAGES` |
-| 3. 모달 화면 | ✅ 코드 완료 | `form-compare-view.tsx` (칸 순서: Field.* → RHF+MUI → useState) |
-| 4. useState 폼 | 🔄 1단계 작성 중 | `state-form.tsx` — 지역 Select 모양만, state 연결 전. 단계별 코드는 02-usestate.md |
+| 3. 모달 화면 | ✅ 코드 완료 | `form-compare-view.tsx` (칸 순서: Field.* → RHF+MUI → useState). `isAdmin` 전달·`key`는 8단계 |
+| 4. useState 폼 | 🔄 1단계 끝 | `state-form.tsx` — 지역·지점 Select + validate + 에러 표시 + 임시 "예약" 버튼. **다음: 1-1단계 `ERROR_MESSAGES` 꺼내 쓰기(아직 안 함)**. 진행 체크리스트와 "현재 파일에서 고쳐야 할 것"은 02-usestate.md 4번 맨 위 "현재 진행 위치", 단계별 코드(1-1단계 포함)는 그 아래 |
 | 5. 확인 | ⏳ | 체크리스트는 02-usestate.md에 있음 |
 | 6. 불편한 점 | 📝 초안 | 02-usestate.md 맨 아래 |
 
 ### git
 
-- 커밋: `b01366b chore: Next.js 16 + MUI v9 프로젝트 셋업` (① 셋업) 하나뿐.
-- **아직 push한 적 없음.** 원격 `origin`(github.com/atzzuny-hub/form-compare)에 브랜치가 없다. 다른 컴퓨터에서 이어가려면 이 컴퓨터에서 먼저 커밋 + push 해야 한다.
-- 커밋 안 된 변경 (②편 작업 중):
-  - `src/sections/form-compare/types.ts`, `constants.ts` (새 파일)
-  - `src/sections/form-compare/state-form.tsx` (작성 중)
-  - `src/sections/form-compare/view/form-compare-view.tsx` (Dialog 화면)
-  - `src/app/page.tsx` (`import type` → `import`로 돌아가 있음, 되돌릴 것)
-  - `docs/` (이 문서들)
-
+- 브랜치 `main`, 원격 `origin` = github.com/atzzuny-hub/form-compare. 아래 커밋은 모두 origin/main에 push되어 있다.
+  - `6a90937 wip: useState 폼 지역·지점 선택과 에러 표시`
+  - `f92fd2c wip: ②편 공통 데이터·검증 규칙, 모달 화면, useState 폼 작성 중`
+  - `b01366b chore: Next.js 16 + MUI v9 프로젝트 셋업`
+- 코드 변경은 모두 커밋됨 (코드 기준 마지막 커밋 `6a90937`). `page.tsx`는 `import { Metadata }`(type 없이)로 커밋되어 있으니 남은 일에서 되돌린다.
 ### 남은 일
 
-- [ ] `state-form.tsx` 0~8단계 완성 (02-usestate.md 4번)
+- [ ] **다음:** 1-1단계 `ERROR_MESSAGES` 연결 — import에 추가 + validate의 문자열 두 줄 교체 (02-usestate.md 4번 "1-1단계")
+- [ ] 1단계 정리 — 지점 Select의 `labelId`/`id`/`label="Age"`/`sx`, id에 `state-` 접두사, `<div>` → `<Stack spacing={2}>`, 제목 `Typography`, `required`, 지점 `disabled` (02-usestate.md "현재 파일에서 고쳐야 할 것")
+- [ ] `state-form.tsx` 2~8단계 — 지금 파일은 지역·지점만 있어서, 단계 코드를 옮길 때 그 칸의 타입·기본값·validate, import, `clearError`, `isAdmin` prop을 같이 챙긴다 (02-usestate.md "현재 진행 위치" 아래 목록). 6단계는 새로 만들지 말고 지금 있는 `validate`·`handleSubmit`을 고친다
 - [ ] `form-debug-panel.tsx` 만들기 (7단계)
 - [ ] view: `<StateForm isAdmin={isAdmin} />`, `key={openKey}` (8단계)
 - [ ] `page.tsx`: `import type { Metadata }`로 되돌리기
@@ -92,6 +90,9 @@ http://localhost:3000 → "열기" 버튼 → 모달.
 | 정수 검사 추가 | 원본도 1.5명을 통과시키던 구멍 |
 | 날짜 화면값 `reservedAtInput` 따로 | 저장용 문자열에서 다시 만든 값을 넘기면 없는 날짜 입력 시 마지막 칸 입력이 씹힘 |
 | `toSubmitValue` | ③④편과 같은 모양으로 제출값 비교 (인원 수 숫자, 참석자 id 제거) |
+| state-form은 작게 시작해서 칸을 늘린다 | 사용자가 직접 쓰면서 글로 설명하기 위해. 02-usestate.md의 0~8단계 코드는 "완성 기준" |
+| 에러 타입은 `Partial<Record<keyof ReservationInfo, string>>` | `ERROR_MESSAGES`의 값(as const 리터럴)이 `string` 칸에 그대로 들어가고, 키 오타는 TS가 잡는다. 다른 칸 문구를 넣는 실수까지 막으려면 `ERROR_MESSAGES`에서 조건부 타입으로 칸별 문구 타입을 뽑아야 해서 ②에서는 쓰지 않음 |
+| 에러는 state에 담는다 (렌더링 중 `validate()` 호출 X) | 렌더링마다 검사하면 모달을 열자마자 에러가 뜬다. state에 담아야 "제출 후에만" 보여줄 수 있다 |
 
 ## 알게 된 함정 (버전별)
 
@@ -115,6 +116,18 @@ http://localhost:3000 → "열기" 버튼 → 모달.
 
 **MUI Dialog**
 - 닫힘 애니메이션이 끝나야 unmount(`Modal.js` 190줄). 애니메이션 도중 다시 열면 상태 유지.
+
+**MUI Select / FormControl**
+- 값이 선택지에 없으면 dev 콘솔에 ``out-of-range value `0` `` 경고 → "선택안함"을 `<MenuItem value={0}>`으로 넣는다.
+- 라벨은 `document.getElementById(labelId)`로 찾는다 → `InputLabel id` = `Select labelId`. 세 폼이 한 화면이라 id에 `state-` 같은 접두사를 붙인다.
+- `FormControl error`를 주면 테두리·라벨·`FormHelperText`가 같이 빨개진다 (`FormHelperText`는 FormControl의 error를 물려받음).
+
+**TypeScript**
+- setState 콜백이 돌려주는 객체는 남는 키를 검사하지 않는다 → `marketId: 0` 같은 오타가 통과. `(prev): ReservationInfo => ({ ... })`로 반환 타입을 적으면 잡힌다.
+- `useState<T>()`처럼 초기값을 빼면 타입이 `T | undefined`.
+- 제네릭 없이 `useState({ attendees: [] })`면 `attendees`가 `never[]`로 추론된다 → `useState<ReservationInfo>(...)`.
+- 값(`ERROR_MESSAGES`)은 타입 자리에 못 쓴다(TS2749) → 타입이 필요하면 `typeof ERROR_MESSAGES`.
+- `as const`의 읽기전용은 타입 검사에서만 (실행 중 `Object.freeze`가 아님).
 
 ## ③편 준비 메모
 
